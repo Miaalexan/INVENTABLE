@@ -1,0 +1,14 @@
+{% extends 'menu/base.html' %}
+
+{% block title %}Editar Producto{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Editar Producto: {{ producto.nombre }}</h2>
+
+<form method="POST" class="card p-4 shadow-sm">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Guardar cambios</button>
+    <a href="{% url 'menu:lista_productos' %}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}
