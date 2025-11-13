@@ -1,37 +1,99 @@
-{% extends 'menu/base.html' %}
+{% extends 'base.html' %}
 
-{% block title %}Lista de Productos{% endblock %}
+{% block title %}INVENTABLE{% endblock %}
 
 {% block content %}
-<h2 class="mb-4">Lista de Productos</h2>
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>
+                <i class="bi bi-menu-button-wide-fill"></i> Gestión de Menú
+            </h2>
+        </div>
+    </div>
 
-<table class="table table-striped">
-    <thead class="table-dark">
-        <tr>
-            <th>Nombre</th>
-            <th>Categoría</th>
-            <th>Precio</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
+    <!-- Barra de acciones principal -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row g-3 align-items-center">
+                <!-- Crear categoría -->
+                <div class="col-md-3">
+                    <a href="{% url 'menu:crear_categoria' %}" class="btn btn-success w-100">
+                        <i class="bi bi-folder-plus"></i> Crear Categoría
+                    </a>
+                </div>
+
+                <!-- Crear producto -->
+                <div class="col-md-3">
+                    <a href="{% url 'menu:crear_producto' %}" class="btn btn-primary w-100">
+                        <i class="bi bi-plus-circle"></i> Crear Producto
+                    </a>
+                </div>
+
+                <!-- Buscar categoría -->
+                <div class="col-md-3">
+                    <form method="get" action="{% url 'menu:lista_productos' %}" class="d-flex">
+                        <input type="text" name="buscar_categoria" class="form-control me-2"
+                               placeholder="Buscar categoría..." value="{{ request.GET.buscar_categoria }}">
+                        <button class="btn btn-outline-secondary" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Buscar producto -->
+                <div class="col-md-3">
+                    <form method="get" action="{% url 'menu:lista_productos' %}" class="d-flex">
+                        <input type="text" name="buscar_producto" class="form-control me-2"
+                               placeholder="Buscar producto..." value="{{ request.GET.buscar_producto }}">
+                        <button class="btn btn-outline-secondary" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--  Lista de productos -->
+    <div class="row">
         {% for producto in productos %}
-        <tr>
-            <td>{{ producto.nombre }}</td>
-            <td>{{ producto.categoria }}</td>
-            <td>${{ producto.precio }}</td>
-            <td>
-                <a href="{% url 'menu:editar_producto' producto.id %}" class="btn btn-warning btn-sm">Editar</a>
-                <a href="{% url 'menu:eliminar_producto' producto.id %}" class="btn btn-danger btn-sm">Eliminar</a>
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="4" class="text-center text-muted">No hay productos registrados</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm {% if not producto.activo %}opacity-50{% endif %}">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        {{ producto.nombre }}
+                        {% if not producto.activo %}
+                            <span class="badge bg-secondary">Inactivo</span>
+                        {% endif %}
+                    </h5>
+                    <p class="card-text mb-1"><strong>Categoría:</strong> {{ producto.categoria.nombre }}</p>
+                    <p class="card-text"><strong>Precio:</strong> ${{ producto.precio }}</p>
+                </div>
 
-<a href="{% url 'menu:crear_producto' %}" class="btn btn-success">+ Agregar Producto</a>
+                <!-- ACCIONES -->
+                <div class="card-footer text-center">
+                    <div class="btn-group" role="group">
+                        <!-- Editar -->
+                        <a href="{% url 'menu:editar_producto' producto.id %}"
+                           class="btn btn-sm btn-warning" title="Editar">
+                            <i class="bi bi-pencil-fill"></i>
+                        </a>
+
+                        <!-- Activar / Desactivar -->
+                        <a href="{% url 'menu:cambiar_estado_producto' producto.id %}"
+                           class="btn btn-sm {% if producto.activo %}btn-secondary{% else %}btn-success{% endif %}"
+                           title="{% if producto.activo %}Desactivar{% else %}Activar{% endif %}"
+                           onclick="return confirm('¿Estás seguro de cambiar el estado de este producto?')">
+                            <i class="bi bi-{% if producto.activo %}x-circle{% else %}check-circle{% endif %}"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+            <p class="text-center text-muted">No hay productos disponibles.</p>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}

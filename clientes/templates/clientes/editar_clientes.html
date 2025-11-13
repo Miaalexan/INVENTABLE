@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Registrar Cliente{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">Registrar Cliente</h2>
+    <form method="post" class="card p-4 shadow-sm">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="text-center">
+            <button type="submit" class="btn btn-success">Guardar</button>
+            <a href="{% url 'clientes:lista_clientes' %}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

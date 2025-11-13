@@ -1,9 +1,9 @@
 from django.contrib import admin
-from .models import cliente
+from .models import Cliente
 
 
-@admin.register(cliente)
+@admin.register(Cliente)
 class ClientesAdmin(admin.ModelAdmin):
-    list_display = ('id', 'nombre', 'apellido', 'num_documento','telefono','correo')  # columnas que quieres ver en la lista
-    search_fields = ('id', 'nombre', 'apellido', 'num_documento','telefono','correo')  # para habilitar búsqueda
-    list_filter = ('id', 'nombre', 'apellido', 'num_documento','telefono','correo')  # filtros por categoría
+    list_display = ('id', 'nombre','telefono','correo','direccion','activo')  # columnas que quieres ver en la lista
+    search_fields = ('id', 'nombre','telefono','correo','direccion','activo')  # para habilitar búsqueda
+    list_filter = ('id', 'nombre','telefono','correo','direccion','activo')  # filtros por categoría

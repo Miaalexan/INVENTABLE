@@ -1,25 +1,16 @@
 from django import forms
-from menu.models import Producto
+from .models import Producto
 
 class ProductoForm(forms.ModelForm):
     """
-    Forms se utiliza para crear o editar productos
-    dentro del sistema (en el módulo del menú).
+    Formulario para crear o editar productos del menú.
     """
-
     class Meta:
-        model = Producto  # Indica que el formulario usa el modelo Producto
-        fields = ['nombre', 'categoria', 'precio']  # Campos que aparecerán en el formulario
-
-        # Personalización de etiquetas y widgets (opcional pero recomendado)
-        labels = {
-            'nombre': 'Nombre del producto',
-            'categoria': 'Categoría',
-            'precio': 'Precio (COP)',
-        }
-
+        model = Producto
+        fields = ['nombre', 'categoria', 'precio', 'descripcion']
         widgets = {
-            'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Pizza Hawaiana'}),
-            'categoria': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Bebida, Comida...'}),
+            'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre del producto'}),
+            'categoria': forms.Select(attrs={'class': 'form-select'}),
             'precio': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Descripción opcional'}),
         }

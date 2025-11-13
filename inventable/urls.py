@@ -20,4 +20,10 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('menu/', include('menu.urls')), # Conecta el módulo del menú
+    path('clientes/', include('clientes.urls')), # Conecta el módulo del clientes
+    path('pedidos/', include('pedidos.urls')), # Conecta el módulo del pedidos
+    path('reservas/', include('reservas.urls')), # Conecta el módulo del reservas
+    path('usuarios/', include('usuarios.urls')),
+    path('panelAdmin/', include ('panelAdmin.urls')),
 ]
+
