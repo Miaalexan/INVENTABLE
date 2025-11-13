@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4"><i class="bi bi-people-fill"></i> Gestión de Usuarios</h2>
+
+    <!-- 🔹 Barra de acciones -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <form method="GET" action="{% url 'usuarios:lista_usuarios' %}">
+                <div class="row g-3 align-items-center">
+
+                    <!-- Botón Crear Usuario -->
+                    <div class="col-md-3 col-sm-12">
+                        <a href="{% url 'usuarios:crear_usuario' %}" class="btn btn-primary w-100">
+                            <i class="bi bi-person-plus-fill"></i> Crear Usuario
+                        </a>
+                    </div>
+
+                    <!-- Buscar por nombre -->
+                    <div class="col-md-4 col-sm-6">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input 
+                                type="text" 
+                                name="buscar_nombre" 
+                                class="form-control" 
+                                placeholder="Buscar por nombre..." 
+                                value="{{ buscar_nombre|default:'' }}"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Filtro por rol -->
+                    <div class="col-md-3 col-sm-6">
+                        <select name="rol" class="form-select" onchange="this.form.submit()">
+                            <option value="">Todos los roles</option>
+                            <option value="admin" {% if rol == 'admin' %}selected{% endif %}>Administrador</option>
+                            <option value="cajero" {% if rol == 'cajero' %}selected{% endif %}>Cajero</option>
+                            <option value="mesero" {% if rol == 'mesero' %}selected{% endif %}>Mesero</option>
+                        </select>
+                    </div>
+
+                    <!-- Botón Filtrar -->
+                    <div class="col-md-2 col-sm-12">
+                        <button type="submit" class="btn btn-outline-secondary w-100">
+                            <i class="bi bi-funnel"></i> Filtrar
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 🔹 Contenedor de lista de usuarios -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white">
+            <i class="bi bi-list-check"></i> Lista de Usuarios
+        </div>
+        <div class="card-body">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-info">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Código</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for usuario in usuarios %}
+                            <tr>
+                                <td>{{ usuario.id }}</td>
+                                <td>{{ usuario.nombre }}</td>
+                                <td>{{ usuario.codigo }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if usuario.rol == 'admin' %}bg-primary
+                                        {% elif usuario.rol == 'cajero' %}bg-success
+                                        {% else %}bg-warning text-dark{% endif %}">
+                                        {{ usuario.rol|capfirst }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if usuario.activo %}
+                                        <span class="badge bg-success">Activo</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group" role="group">
+                                        <!-- Botón Editar -->
+                                        <a href="{% url 'usuarios:editar_usuario' usuario.id %}" 
+                                           class="btn btn-sm btn-warning" title="Editar">
+                                            <i class="bi bi-pencil-fill"></i>
+                                        </a>
+
+                                        <!-- Botón Activar/Desactivar -->
+                                        {% if usuario.activo %}
+                                            <a href="{% url 'usuarios:desactivar_usuario' usuario.id %}" 
+                                               class="btn btn-sm btn-danger" 
+                                               title="Desactivar"
+                                               onclick="return confirm('¿Deseas desactivar este usuario?');">
+                                                <i class="bi bi-person-x-fill"></i>
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'usuarios:activar_usuario' usuario.id %}" 
+                                               class="btn btn-sm btn-success" 
+                                               title="Activar"
+                                               onclick="return confirm('¿Deseas activar este usuario?');">
+                                                <i class="bi bi-person-check-fill"></i>
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-3">
+                                    No hay usuarios registrados.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

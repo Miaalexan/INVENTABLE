@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Bienvenido {{ usuario.nombre }}</h2>
+    <p>Tu rol es: <strong>{{ usuario.rol }}</strong></p>
+
+    {% if usuario.rol == 'admin' %}
+        <a href="{% url 'usuarios:lista_usuarios' %}" class="btn btn-success">Gestionar usuarios</a>
+    {% elif usuario.rol == 'cajero' %}
+        <a href="/pedidos/" class="btn btn-primary">Ir a pedidos</a>
+        <a href="/reservas/" class="btn btn-secondary">Ir a reservas</a>
+        <a href="/clientes/" class="btn btn-info">Ver clientes</a>
+    {% elif usuario.rol == 'mesero' %}
+        <a href="/pedidos/" class="btn btn-warning">Ver pedidos</a>
+    {% endif %}
+</div>
+{% endblock %}
