@@ -71,16 +71,28 @@ def crear_pedido(request):
             # -----------------------------------
             #  PAGAR DIRECTAMENTE
             # -----------------------------------
-            if metodo_pago_id:
-                metodo_pago = Pedido.objects.get(id=metodo_pago_id)
-                pedido.metodo_pago = metodo_pago
-                pedido.estado = "PAGADO"
-                pedido.valor_pagado = total_final
-                pedido.fecha_pago = timezone.now()
-                pedido.save()
+            
+        if pedido_form.is_valid(): 
+            pedido.estado = "PAGADO"
+            pedido.valor_pagado = total_final
+            pedido.fecha_pago = timezone.now()
+            pedido.save()
+            
+            messages.success(request, "Pedido pagado correctamente.")
+            return redirect('pedidos:lista_pedidos')
+            
+            
+            
+            #if metodo_pago_id:
+            #    metodo_pago = Pedido.objects.get(id=metodo_pago_id)
+            #    pedido.metodo_pago = metodo_pago
+            #    pedido.estado = "PAGADO"
+            #    pedido.valor_pagado = total_final
+            #    pedido.fecha_pago = timezone.now()
+            #    pedido.save()
 
-                messages.success(request, "Pedido pagado correctamente.")
-                return redirect('pedidos:lista_pedidos')
+            #    messages.success(request, "Pedido pagado correctamente.")
+            #   return redirect('pedidos:lista_pedidos')
 
             # -----------------------------------
             #  SOLO GUARDAR
@@ -101,7 +113,7 @@ def crear_pedido(request):
     return render(request, 'pedidos/crear_pedido.html', {
         'pedido_form': pedido_form,
         'categorias': categorias,
-        'metodos_pago': metodos
+
     })
 
 
