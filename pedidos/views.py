@@ -1,11 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.utils import timezone
-from django.db.models import Sum
-from .models import Pedido, DetallePedido
+from pedidos.models import Pedido, DetallePedido
 from menu.models import Categoria, Producto
-from .forms import PedidoForm, DetallePedidoFormSet
+from .forms import PedidoForm
 from usuarios.decorators import rol_requerido
+
 
 # ======================================================
 # 📋 LISTA DE PEDIDOS
@@ -31,37 +31,78 @@ def crear_pedido(request):
     categorias = Categoria.objects.prefetch_related('productos').all()
 
     if request.method == 'POST':
+
         pedido_form = PedidoForm(request.POST)
-        formset = DetallePedidoFormSet(request.POST)
+        metodo_pago_id = request.POST.get("metodo_pago")
 
-        if pedido_form.is_valid() and formset.is_valid():
+        productos_ids = request.POST.getlist("producto_id[]")
+        cantidades = request.POST.getlist("cantidad[]")
+        precios = request.POST.getlist("precio[]")
+
+        if pedido_form.is_valid():
+
+            # Crear pedido base
             pedido = pedido_form.save(commit=False)
+            pedido.estado = "ABIERTO"
             pedido.total = 0
-            pedido.estado = 'ABIERTO'
             pedido.save()
 
-            formset.instance = pedido
-            formset.save()
+            total_final = 0
 
-            # Calcula total
-            total = pedido.detalles.aggregate(total=Sum('subtotal'))['total'] or 0
-            pedido.total = total
+            # Crear detalles y calcular total
+            for i in range(len(productos_ids)):
+                producto = Producto.objects.get(id=productos_ids[i])
+                cantidad = int(cantidades[i])
+                precio = float(precios[i])
+
+                subtotal = cantidad * precio
+                total_final += subtotal
+
+                DetallePedido.objects.create(
+                    pedido=pedido,
+                    producto=producto,
+                    cantidad=cantidad,
+                    precio_unitario=precio,
+                    subtotal=subtotal
+                )
+
+            pedido.total = total_final
+
+            # -----------------------------------
+            #  PAGAR DIRECTAMENTE
+            # -----------------------------------
+            if metodo_pago_id:
+                metodo_pago = Pedido.objects.get(id=metodo_pago_id)
+                pedido.metodo_pago = metodo_pago
+                pedido.estado = "PAGADO"
+                pedido.valor_pagado = total_final
+                pedido.fecha_pago = timezone.now()
+                pedido.save()
+
+                messages.success(request, "Pedido pagado correctamente.")
+                return redirect('pedidos:lista_pedidos')
+
+            # -----------------------------------
+            #  SOLO GUARDAR
+            # -----------------------------------
             pedido.save()
 
-            messages.success(request, "Pedido creado correctamente.")
+            messages.success(request, "Pedido guardado correctamente.")
             return redirect('pedidos:pago', pedido.id)
+
         else:
             messages.error(request, "Hay errores en el formulario.")
+
     else:
         pedido_form = PedidoForm()
-        formset = DetallePedidoFormSet()
 
-    context = {
+    
+
+    return render(request, 'pedidos/crear_pedido.html', {
         'pedido_form': pedido_form,
-        'formset': formset,
         'categorias': categorias,
-    }
-    return render(request, 'pedidos/crear_pedido.html', context)
+        'metodos_pago': metodos
+    })
 
 
 # ======================================================
@@ -84,7 +125,7 @@ def editar_pedidos(request, id):
 
 
 # ======================================================
-# 🔁 CAMBIAR ESTADO
+#  CAMBIAR ESTADO
 # ======================================================
 @rol_requerido(['admin', 'cajero', 'mesero'])
 def cambiar_estado_pedido(request, id, nuevo_estado):
@@ -100,32 +141,29 @@ def cambiar_estado_pedido(request, id, nuevo_estado):
 
 
 # ======================================================
-# 💵 PANTALLA DE PAGO
+#  PANTALLA DE PAGO
 # ======================================================
-@rol_requerido(['admin', 'cajero'])
-def pago_pedido(request, id):
-    pedido = get_object_or_404(Pedido, id=id)
-
-    if request.method == 'POST':
-        metodo = request.POST.get('metodo')
-        pedido.metodo_pago = metodo
-        pedido.estado = 'PAGADO'
-        pedido.fecha_pago = timezone.now()
-        pedido.valor_pagado = pedido.total
-        pedido.save()
-
-        messages.success(request, f"Pedido #{pedido.id} pagado con {metodo}.")
-        return redirect('pedidos:lista_pedidos')
-
-    metodos_pago = [
-        ('Efectivo', 'bi-cash'),
-        ('Tarjeta', 'bi-credit-card-2-front'),
-        ('Transferencia', 'bi-bank'),
-        ('Nequi', 'bi-phone'),
-    ]
-
-    context = {
-        'pedido': pedido,
-        'metodos_pago': metodos_pago,
-    }
-    return render(request, 'pedidos/pago.html', context)
+#rol_requerido(['admin', 'cajero'])
+#def pago_pedido(request, id):
+#   pedido = get_object_or_404(Pedido, id=id)
+#
+ #   if request.method == 'POST':
+  #      metodo_id = request.POST.get('metodo')
+#
+ #       metodo = metodos_pago.objects.get(id=metodo_id)
+  #      pedido.metodo_pago = metodo
+   #     pedido.estado = 'PAGADO'
+    #    pedido.fecha_pago = timezone.now()
+     #   pedido.valor_pagado = pedido.total
+      #  pedido.save()
+#
+ #       messages.success(request, f"Pedido #{pedido.id} pagado con {metodo.nombre}.")
+  #      return redirect('pedidos:lista_pedidos')
+#
+ #   metodos_pago = metodos_pago.objects.filter(activo=True)
+#
+ #   context = {
+  #      'pedido': pedido,
+   #     'metodos_pago': metodos_pago,
+    #}
+   # return render(request, 'pedidos/lista_pedidos', context)

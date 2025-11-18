@@ -97,17 +97,12 @@
                                         {% endif %}
                                     </td>
                                     <td class="text-center">
-                                        <div class="btn-group" role="group">
-                                            <a href="{% url 'pedidos:ver_pedido' pedido.id %}" 
-                                               class="btn btn-sm btn-info" title="Ver">
-                                                <i class="bi bi-eye-fill"></i>
-                                            </a>
-                                            <a href="{% url 'pedidos:editar_pedido' pedido.id %}" 
+                                            <a href="{% url 'pedidos:editar_pedidos' pedido.id %}" 
                                                class="btn btn-sm btn-warning" title="Editar">
                                                 <i class="bi bi-pencil-fill"></i>
                                             </a>
                                             {% if pedido.estado != 'cerrada' %}
-                                                <a href="{% url 'pedidos:cerrar_pedido' pedido.id %}" 
+                                                <a href="{% url 'pedidos:editar_pedidos' pedido.id %}" 
                                                    class="btn btn-sm btn-danger"
                                                    title="Cerrar Orden"
                                                    onclick="return confirm('¿Deseas cerrar esta orden?')">
