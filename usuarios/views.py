@@ -37,7 +37,7 @@ def logout_usuario(request):
 def inicio(request):
     nombre = request.session.get('nombre')
     rol = request.session.get('rol')
-    return render(request, 'usuarios/inicio.html', {'nombre': nombre, 'rol': rol})
+    return render(request, 'pedidos/lista_pedidos.html', {'nombre': nombre, 'rol': rol})
 
 
 # --- LISTA DE USUARIOS (solo admin) ---
