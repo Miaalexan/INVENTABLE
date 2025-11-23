@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Cambiar Estado{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3><i class="bi bi-arrow-repeat"></i> Cambiar estado de la reserva</h3>
+    <hr>
+    <p><strong>Cliente:</strong> {{ reserva.cliente }}</p>
+    <p><strong>Fecha:</strong> {{ reserva.fecha_reserva }}</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="estado" class="form-label">Nuevo estado</label>
+            <select name="estado" id="estado" class="form-select">
+                {% for value, label in reserva.ESTADOS %}
+                    <option value="{{ value }}" {% if reserva.estado == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+        <a href="{% url 'reservas:lista_reservas' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}
