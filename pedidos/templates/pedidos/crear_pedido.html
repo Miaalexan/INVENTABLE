@@ -2,9 +2,10 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-4">Crear Pedido</h2>
+    <h2 class="mb-4">
+        {% if modo_edicion %}Editar Pedido #{{ pedido_form.instance.id }}{% else %}Crear Pedido{% endif %}
+    </h2>
 
-    <!-- Formulario principal -->
     <form method="POST" id="pedidoForm">
         {% csrf_token %}
 
@@ -13,15 +14,18 @@
             <div class="card-header bg-dark text-white">
                 Datos del Pedido
             </div>
+
             <div class="card-body row g-3">
                 <div class="col-md-4">
                     <label class="form-label">Cliente</label>
                     {{ pedido_form.cliente }}
                 </div>
+
                 <div class="col-md-4">
                     <label class="form-label">Reserva</label>
                     {{ pedido_form.reserva }}
                 </div>
+
                 <div class="col-md-4">
                     <label class="form-label">Estado</label>
                     {{ pedido_form.estado }}
@@ -29,8 +33,9 @@
             </div>
         </div>
 
-        <!--  SECCIÓN DE CATEGORÍAS Y PRODUCTOS -->
+        <!-- SECCIÓN DE CATEGORÍAS Y PRODUCTOS -->
         <div class="row">
+
             <!-- CATEGORÍAS -->
             <div class="col-md-4">
                 <div class="card h-100">
@@ -57,14 +62,10 @@
                                                     data-precio="{{ producto.precio }}">
                                                 {{ producto.nombre }} - ${{ producto.precio }}
                                             </button>
-                                        {% empty %}
-                                            <div class="text-muted small">Sin productos</div>
                                         {% endfor %}
                                     </div>
                                 </div>
                             </div>
-                        {% empty %}
-                            <p class="text-muted">No hay categorías registradas.</p>
                         {% endfor %}
                     </div>
                 </div>
@@ -76,6 +77,7 @@
                     <div class="card-header bg-secondary text-white">
                         Detalles del Pedido
                     </div>
+
                     <div class="card-body">
                         <table class="table table-bordered align-middle" id="tabla-detalles">
                             <thead class="table-light">
@@ -87,35 +89,37 @@
                                     <th>Acción</th>
                                 </tr>
                             </thead>
+
                             <tbody id="detalle-body">
-                                <!-- Filas dinámicas -->
+                                <!-- Se llenará dinámicamente -->
                             </tbody>
                         </table>
 
                         <div class="d-flex justify-content-between mt-3">
                             <h5>Total: $<span id="total">0.00</span></h5>
+
                             <div class="d-flex gap-2">
+                                <!-- Botón Guardar -->
+                                <button type="submit" name="accion" value="guardar" class="btn btn-secondary">
+                                    Guardar
+                                </button>
 
-    <!-- Botón Guardar -->
-    <button type="submit" name="accion" value="guardar" class="btn btn-secondary">
-        Guardar
-    </button>
+                                <!-- Método de pago -->
+                                <select name="metodo_pago" class="form-select w-auto">
+                                    <option value="efectivo">Efectivo</option>
+                                    <option value="tarjeta">Tarjeta</option>
+                                    <option value="transferencia">Transferencia</option>
+                                </select>
 
-    <!-- Selección de método de pago -->
-    <select name="metodo_pago" class="form-select w-auto">
-        <option value="efectivo">Efectivo</option>
-        <option value="tarjeta">Tarjeta</option>
-    </select>
-
-    <!-- Botón pagar -->
-    <button type="submit" name="accion" value="pagar" class="btn btn-success">
-        Pagar
-    </button>
-
-</div>
+                                <!-- Botón pagar -->
+                                <button type="submit" name="accion" value="pagar" class="btn btn-success">
+                                    Pagar
+                                </button>
+                            </div>
 
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -123,60 +127,101 @@
     </form>
 </div>
 
-<!--  SCRIPT PARA AGREGAR PRODUCTOS  -->
+<!-- SCRIPT PARA AGREGAR PRODUCTOS Y CARGAR DETALLES EXISTENTES -->
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     const detalleBody = document.getElementById("detalle-body");
     const totalSpan = document.getElementById("total");
-    let total = 0;
 
+    // Función para agregar fila a la tabla
+    function agregarFila(id, nombre, precio, cantidad) {
+        const fila = document.createElement("tr");
+        fila.id = `fila-${id}`;
+
+        const subtotal = precio * cantidad;
+
+        fila.innerHTML = `
+            <td>
+                ${nombre}
+                <input type="hidden" name="producto_id[]" value="${id}">
+            </td>
+
+            <td>
+                <input type="number" class="form-control cantidad" value="${cantidad}" min="1">
+                <input type="hidden" name="cantidad[]" class="cantidad-hidden" value="${cantidad}">
+            </td>
+
+            <td>
+                <span class="precio">${precio.toFixed(2)}</span>
+                <input type="hidden" name="precio[]" value="${precio}">
+            </td>
+
+            <td class="subtotal">${subtotal.toFixed(2)}</td>
+
+            <td>
+                <button type="button" class="btn btn-danger btn-sm eliminar">BORRAR</button>
+            </td>
+        `;
+
+        detalleBody.appendChild(fila);
+
+        fila.querySelector(".cantidad").addEventListener("change", actualizarTotal);
+        fila.querySelector(".eliminar").addEventListener("click", () => {
+            fila.remove();
+            actualizarTotal();
+        });
+    }
+
+    // Cargar detalles de un pedido existente (modo edición)
+    {% if modo_edicion %}
+        {% for d in detalles_existentes %}
+            agregarFila({{ d.producto.id }}, "{{ d.producto.nombre }}", {{ d.precio_unitario }}, {{ d.cantidad }});
+        {% endfor %}
+        actualizarTotal();
+    {% endif %}
+
+    // Evento de agregar producto desde el menú
     document.querySelectorAll(".producto-btn").forEach(btn => {
         btn.addEventListener("click", () => {
             const id = btn.dataset.id;
             const nombre = btn.dataset.nombre;
             const precio = parseFloat(btn.dataset.precio);
 
-            // Verificar si el producto ya está en la tabla
             let existente = document.querySelector(`#fila-${id}`);
             if (existente) {
-                let cantidadInput = existente.querySelector(".cantidad");
-                cantidadInput.value = parseInt(cantidadInput.value) + 1;
-                cantidadInput.dispatchEvent(new Event("change"));
+                let cantidad = existente.querySelector(".cantidad");
+                cantidad.value = parseInt(cantidad.value) + 1;
+                cantidad.dispatchEvent(new Event("change"));
                 return;
             }
 
-            const fila = document.createElement("tr");
-            fila.id = `fila-${id}`;
-            fila.innerHTML = `
-                <td>${nombre}</td>
-                <td><input type="number" class="form-control cantidad" value="1" min="1"></td>
-                <td class="precio">${precio.toFixed(2)}</td>
-                <td class="subtotal">${precio.toFixed(2)}</td>
-                <td><button type="button" class="btn btn-danger btn-sm eliminar">BORRAR</button></td>
-            `;
-            detalleBody.appendChild(fila);
-
+            agregarFila(id, nombre, precio, 1);
             actualizarTotal();
-
-            fila.querySelector(".cantidad").addEventListener("change", actualizarTotal);
-            fila.querySelector(".eliminar").addEventListener("click", () => {
-                fila.remove();
-                actualizarTotal();
-            });
         });
     });
 
+    // Recalcular total
     function actualizarTotal() {
-        total = 0;
+        let total = 0;
+
         document.querySelectorAll("#detalle-body tr").forEach(fila => {
-            const cantidad = parseInt(fila.querySelector(".cantidad").value);
+            const cantidadInput = fila.querySelector(".cantidad");
+            const cantidadHidden = fila.querySelector(".cantidad-hidden");
+
+            const cantidad = parseInt(cantidadInput.value);
             const precio = parseFloat(fila.querySelector(".precio").textContent);
+
             const subtotal = cantidad * precio;
             fila.querySelector(".subtotal").textContent = subtotal.toFixed(2);
+
+            cantidadHidden.value = cantidad;
+
             total += subtotal;
         });
+
         totalSpan.textContent = total.toFixed(2);
     }
 });
 </script>
+
 {% endblock %}

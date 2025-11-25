@@ -30,66 +30,143 @@
     <!-- ===== Cards principales ===== -->
     <div class="row g-4">
         <div class="col-md-3">
-            <div class="card text-center shadow-sm p-3">
+            <div class="card text-center shadow-sm p-3 border-primary">
                 <small class="text-muted">Total Pedidos</small>
                 <h3 class="mt-2">{{ total_pedidos }}</h3>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card text-center shadow-sm p-3">
+            <div class="card text-center shadow-sm p-3 border-success">
                 <small class="text-muted">Pedidos Pagados</small>
                 <h3 class="mt-2 text-success">{{ pedidos_pagados }}</h3>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card text-center shadow-sm p-3">
+            <div class="card text-center shadow-sm p-3 border-warning">
                 <small class="text-muted">Pedidos Abiertos</small>
                 <h3 class="mt-2 text-warning">{{ pedidos_abiertos }}</h3>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card text-center shadow-sm p-3">
+            <div class="card text-center shadow-sm p-3 border-info">
                 <small class="text-muted">Ventas Totales</small>
                 <h3 class="mt-2 text-primary">${{ ventas_totales|floatformat:2 }}</h3>
             </div>
         </div>
     </div>
 
-    <!-- ===== Ventas rango (si se aplica) y ventas mes/semana ===== -->
+    <!-- ===== Cards de métricas adicionales ===== -->
+    <div class="row g-4 mt-3">
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm p-3">
+                <small class="text-muted">Clientes Únicos</small>
+                <h4 class="mt-2"><i class="bi bi-people-fill text-info"></i> {{ total_clientes_unicos }}</h4>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm p-3">
+                <small class="text-muted">Ticket Promedio</small>
+                <h4 class="mt-2"><i class="bi bi-cash-coin text-success"></i> ${{ ticket_promedio|floatformat:2 }}</h4>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm p-3">
+                <small class="text-muted">Pedidos del Mes</small>
+                <h4 class="mt-2"><i class="bi bi-bag-check-fill text-primary"></i> {{ pedidos_mes }}</h4>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm p-3">
+                <small class="text-muted">Reservas del Mes</small>
+                <h4 class="mt-2"><i class="bi bi-calendar-check-fill text-warning"></i> {{ reservas_mes }}</h4>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Ventas comparativas ===== -->
     <div class="row g-4 mt-3">
         <div class="col-md-4">
             <div class="card shadow-sm p-3">
-                <small class="text-muted">Ventas (rango/aplicado)</small>
+                <small class="text-muted">Ventas (rango aplicado)</small>
                 <h4 class="mt-2">${{ ventas_rango|floatformat:2 }}</h4>
-                <small class="text-muted">Si no aplica filtro, muestra ventas de pagados totales</small>
+                <small class="text-muted">Según filtro seleccionado</small>
             </div>
         </div>
         <div class="col-md-4">
             <div class="card shadow-sm p-3">
-                <small class="text-muted">Ventas (mes)</small>
+                <small class="text-muted">Ventas del Mes</small>
                 <h4 class="mt-2">${{ ventas_mes|floatformat:2 }}</h4>
+                {% if crecimiento_mes %}
+                    <small class="{% if crecimiento_mes > 0 %}text-success{% else %}text-danger{% endif %}">
+                        <i class="bi bi-arrow-{% if crecimiento_mes > 0 %}up{% else %}down{% endif %}-circle-fill"></i>
+                        {{ crecimiento_mes }}% vs mes anterior
+                    </small>
+                {% endif %}
             </div>
         </div>
         <div class="col-md-4">
             <div class="card shadow-sm p-3">
-                <small class="text-muted">Ventas (semana)</small>
+                <small class="text-muted">Ventas de la Semana</small>
                 <h4 class="mt-2">${{ ventas_semana|floatformat:2 }}</h4>
+                {% if crecimiento_semana %}
+                    <small class="{% if crecimiento_semana > 0 %}text-success{% else %}text-danger{% endif %}">
+                        <i class="bi bi-arrow-{% if crecimiento_semana > 0 %}up{% else %}down{% endif %}-circle-fill"></i>
+                        {{ crecimiento_semana }}% vs semana anterior
+                    </small>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Horas pico y rendimiento ===== -->
+    <div class="row g-4 mt-3">
+        <div class="col-md-4">
+            <div class="card shadow-sm p-3">
+                <small class="text-muted">Hora con más Reservas</small>
+                {% if hora_mas_reservas %}
+                    <h3 class="mt-2"><i class="bi bi-clock-fill text-primary"></i> {{ hora_mas_reservas.hora }}:00</h3>
+                    <p class="text-muted mb-0">{{ hora_mas_reservas.total }} reservas</p>
+                {% else %}
+                    <p class="text-muted">No hay datos</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm p-3">
+                <small class="text-muted">Hora con más Pedidos</small>
+                {% if hora_mas_pedidos %}
+                    <h3 class="mt-2"><i class="bi bi-clock-fill text-success"></i> {{ hora_mas_pedidos.hora }}:00</h3>
+                    <p class="text-muted mb-0">{{ hora_mas_pedidos.total }} pedidos</p>
+                {% else %}
+                    <p class="text-muted">No hay datos</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm p-3">
+                <small class="text-muted">Promedio Pedidos/Día</small>
+                <h3 class="mt-2"><i class="bi bi-graph-up text-info"></i> {{ promedio_pedidos_dia }}</h3>
+                <p class="text-muted mb-0">En el mes actual</p>
             </div>
         </div>
     </div>
 
     <!-- ===== Top 3 mas / menos vendidos ===== -->
-    <div class="row g-4 mt-3">
+    <div class="row g-4 mt-4">
         <div class="col-md-6">
             <div class="card shadow-sm">
-                <div class="card-header bg-success text-white">Top 3 - Más vendidos</div>
+                <div class="card-header bg-success text-white">
+                    <i class="bi bi-trophy-fill"></i> Top 3 - Más vendidos
+                </div>
                 <div class="card-body">
                     {% if mas_vendidos %}
                         <ul class="list-group">
                             {% for p in mas_vendidos %}
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     {{ p.producto__nombre }}
-                                    <span class="badge bg-success rounded-pill">{{ p.total_cant }}</span>
+                                    <span class="badge bg-success rounded-pill">{{ p.total_cant }} unidades</span>
                                 </li>
                             {% endfor %}
                         </ul>
@@ -102,14 +179,16 @@
 
         <div class="col-md-6">
             <div class="card shadow-sm">
-                <div class="card-header bg-danger text-white">Top 3 - Menos vendidos</div>
+                <div class="card-header bg-danger text-white">
+                    <i class="bi bi-arrow-down-circle-fill"></i> Top 3 - Menos vendidos
+                </div>
                 <div class="card-body">
                     {% if menos_vendidos %}
                         <ul class="list-group">
                             {% for p in menos_vendidos %}
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     {{ p.producto__nombre }}
-                                    <span class="badge bg-danger rounded-pill">{{ p.total_cant }}</span>
+                                    <span class="badge bg-danger rounded-pill">{{ p.total_cant }} unidades</span>
                                 </li>
                             {% endfor %}
                         </ul>
@@ -121,50 +200,196 @@
         </div>
     </div>
 
-    <!-- ===== Horas pico ===== -->
-    <div class="row g-4 mt-3">
+    <!-- ===== Top Clientes ===== -->
+    <div class="row g-4 mt-4">
         <div class="col-md-6">
-            <div class="card shadow-sm p-3">
-                <small class="text-muted">Hora con más Reservas</small>
-                {% if hora_mas_reservas %}
-                    <h3 class="mt-2">{{ hora_mas_reservas.hora }}:00</h3>
-                    <p class="text-muted">{{ hora_mas_reservas.total }} reservas</p>
-                {% else %}
-                    <p class="text-muted">No hay datos</p>
-                {% endif %}
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <i class="bi bi-star-fill"></i> Top 5 - Clientes más frecuentes
+                </div>
+                <div class="card-body">
+                    {% if top_clientes_frecuencia %}
+                        <ul class="list-group">
+                            {% for c in top_clientes_frecuencia %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ c.cliente__nombre }} {{ c.cliente__apellido }}
+                                    <span class="badge bg-primary rounded-pill">{{ c.total_pedidos }} pedidos</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">No hay datos.</p>
+                    {% endif %}
+                </div>
             </div>
         </div>
 
         <div class="col-md-6">
-            <div class="card shadow-sm p-3">
-                <small class="text-muted">Hora con más Pedidos</small>
-                {% if hora_mas_pedidos %}
-                    <h3 class="mt-2">{{ hora_mas_pedidos.hora }}:00</h3>
-                    <p class="text-muted">{{ hora_mas_pedidos.total }} pedidos</p>
-                {% else %}
-                    <p class="text-muted">No hay datos</p>
-                {% endif %}
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <i class="bi bi-cash-stack"></i> Top 5 - Clientes con mayor gasto
+                </div>
+                <div class="card-body">
+                    {% if top_clientes_gasto %}
+                        <ul class="list-group">
+                            {% for c in top_clientes_gasto %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ c.cliente__nombre }} {{ c.cliente__apellido }}
+                                    <span class="badge bg-warning text-dark rounded-pill">${{ c.total_gastado|floatformat:2 }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">No hay datos.</p>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- ===== Gráfica ventas últimos 7 días ===== -->
-    <div class="card shadow-sm mt-4">
-        <div class="card-body">
-            <h5 class="mb-3">Ventas últimos 7 días</h5>
-            <canvas id="chart7days" height="90"></canvas>
+    <!-- ===== Gráficos ===== -->
+    <div class="row g-4 mt-4">
+        <!-- Gráfica ventas últimos 7 días -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="mb-3"><i class="bi bi-bar-chart-fill"></i> Ventas últimos 7 días</h5>
+                    <canvas id="chart7days" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfica de categorías -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="mb-3"><i class="bi bi-pie-chart-fill"></i> Ventas por Categoría</h5>
+                    <canvas id="chartCategorias" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Más gráficos ===== -->
+    <div class="row g-4 mt-4">
+        <!-- Top 10 productos -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="mb-3"><i class="bi bi-graph-up-arrow"></i> Top 10 Productos Más Vendidos</h5>
+                    <canvas id="chartTop10" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ventas por turno -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="mb-3"><i class="bi bi-sun-fill"></i> Ventas por Turno</h5>
+                    <canvas id="chartTurnos" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Pedidos por día de la semana ===== -->
+    <div class="row g-4 mt-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="mb-3"><i class="bi bi-calendar-week-fill"></i> Pedidos por Día de la Semana</h5>
+                    <canvas id="chartDiasSemana" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Información adicional de reservas ===== -->
+    <div class="row g-4 mt-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <i class="bi bi-people-fill"></i> Promedio de Personas por Reserva
+                </div>
+                <div class="card-body text-center">
+                    <h2>{{ promedio_personas_reserva|floatformat:1 }}</h2>
+                    <p class="text-muted mb-0">personas por reserva</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <i class="bi bi-award-fill"></i> Producto con Mayor Ingreso
+                </div>
+                <div class="card-body">
+                    {% if producto_mayor_ingreso %}
+                        <h4 class="text-center">{{ producto_mayor_ingreso.producto__nombre }}</h4>
+                        <p class="text-center text-success mb-0">
+                            <strong>${{ producto_mayor_ingreso.ingreso_total|floatformat:2 }}</strong>
+                        </p>
+                    {% else %}
+                        <p class="text-muted text-center">No hay datos</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Top 5 Clientes con más reservas ===== -->
+    <div class="row g-4 mt-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <i class="bi bi-calendar-check-fill"></i> Top 5 - Clientes con más Reservas
+                </div>
+                <div class="card-body">
+                    {% if top_clientes_reservas %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Cliente</th>
+                                        <th class="text-center">Total Reservas</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for c in top_clientes_reservas %}
+                                        <tr>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>{{ c.cliente__nombre }} {{ c.cliente__apellido }}</td>
+                                            <td class="text-center">
+                                                <span class="badge bg-success">{{ c.total_reservas }}</span>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center">No hay datos.</p>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- ===== Últimos pedidos ===== -->
     <div class="card shadow-sm mt-4 mb-5">
         <div class="card-body">
-            <h5 class="mb-3">Últimos pedidos</h5>
+            <h5 class="mb-3"><i class="bi bi-clock-history"></i> Últimos Pedidos</h5>
             <div class="table-responsive">
-                <table class="table table-sm">
+                <table class="table table-sm table-hover">
                     <thead class="table-dark">
                         <tr>
-                            <th>#</th><th>Cliente</th><th>Total</th><th>Estado</th><th>Fecha</th>
+                            <th>#</th>
+                            <th>Cliente</th>
+                            <th>Total</th>
+                            <th>Estado</th>
+                            <th>Fecha</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -173,7 +398,11 @@
                                 <td>{{ p.id }}</td>
                                 <td>{{ p.cliente }}</td>
                                 <td>${{ p.total|floatformat:2 }}</td>
-                                <td>{{ p.estado }}</td>
+                                <td>
+                                    <span class="badge bg-{% if p.estado == 'PAGADO' %}success{% else %}warning{% endif %}">
+                                        {{ p.estado }}
+                                    </span>
+                                </td>
                                 <td>{{ p.fecha|date:"Y-m-d H:i" }}</td>
                             </tr>
                         {% empty %}
@@ -191,25 +420,151 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-    // parse ventas_7_days safely
+    // ===== Gráfico: Ventas últimos 7 días =====
     const ventas7 = JSON.parse('{{ ventas_7_days_json|escapejs }}');
-    const labels = ventas7.map(v => v.date);
-    const values = ventas7.map(v => v.value);
+    const labels7 = ventas7.map(v => v.date);
+    const values7 = ventas7.map(v => v.value);
 
-    const ctx = document.getElementById('chart7days').getContext('2d');
-    new Chart(ctx, {
+    const ctx7 = document.getElementById('chart7days').getContext('2d');
+    new Chart(ctx7, {
         type: 'bar',
         data: {
-            labels: labels,
+            labels: labels7,
             datasets: [{
                 label: 'Ventas ($)',
-                data: values,
+                data: values7,
                 backgroundColor: 'rgba(54, 162, 235, 0.6)',
                 borderColor: 'rgba(54, 162, 235, 1)',
                 borderWidth: 1
             }]
         },
         options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+
+    // ===== Gráfico: Ventas por Categoría =====
+    const categoriasData = JSON.parse('{{ ventas_por_categoria_json|escapejs }}');
+    const labelsCategoria = categoriasData.map(c => c.producto__categoria__nombre || 'Sin categoría');
+    const valuesCategoria = categoriasData.map(c => c.total_ventas);
+
+    const ctxCat = document.getElementById('chartCategorias').getContext('2d');
+    new Chart(ctxCat, {
+        type: 'pie',
+        data: {
+            labels: labelsCategoria,
+            datasets: [{
+                data: valuesCategoria,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(153, 102, 255, 0.7)',
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // ===== Gráfico: Top 10 Productos =====
+    const top10Data = {{ top_10_productos|safe }};
+    const labelsTop10 = top10Data.map(p => p.producto__nombre);
+    const valuesTop10 = top10Data.map(p => p.total_cant);
+
+    const ctxTop10 = document.getElementById('chartTop10').getContext('2d');
+    new Chart(ctxTop10, {
+        type: 'bar',
+        data: {
+            labels: labelsTop10,
+            datasets: [{
+                label: 'Cantidad Vendida',
+                data: valuesTop10,
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: {
+                x: { beginAtZero: true }
+            }
+        }
+    });
+
+    // ===== Gráfico: Ventas por Turno =====
+    const turnosData = JSON.parse('{{ productos_por_turno_json|escapejs }}');
+    const labelsTurnos = turnosData.map(t => {
+        const nombres = {1: 'Mañana', 2: 'Tarde', 3: 'Noche'};
+        return nombres[t.turno] || 'Desconocido';
+    });
+    const valuesTurnos = turnosData.map(t => t.total_ingresos);
+
+    const ctxTurnos = document.getElementById('chartTurnos').getContext('2d');
+    new Chart(ctxTurnos, {
+        type: 'doughnut',
+        data: {
+            labels: labelsTurnos,
+            datasets: [{
+                data: valuesTurnos,
+                backgroundColor: [
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(153, 102, 255, 0.7)',
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // ===== Gráfico: Pedidos por Día de la Semana =====
+    const diasData = JSON.parse('{{ pedidos_por_dia_semana_json|escapejs }}');
+    const diasNombres = {1: 'Domingo', 2: 'Lunes', 3: 'Martes', 4: 'Miércoles', 5: 'Jueves', 6: 'Viernes', 7: 'Sábado'};
+    const labelsDias = diasData.map(d => diasNombres[d.dia_semana] || 'Desconocido');
+    const valuesDias = diasData.map(d => d.total);
+
+    const ctxDias = document.getElementById('chartDiasSemana').getContext('2d');
+    new Chart(ctxDias, {
+        type: 'line',
+        data: {
+            labels: labelsDias,
+            datasets: [{
+                label: 'Cantidad de Pedidos',
+                data: valuesDias,
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
             scales: {
                 y: { beginAtZero: true }
             }

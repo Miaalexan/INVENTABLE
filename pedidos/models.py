@@ -29,7 +29,8 @@ class Pedido(models.Model):
     metodo_pago = models.CharField(max_length=20, choices=METODOS_PAGO, null=True, blank=True)
     valor_pagado = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     estado = models.CharField(max_length=10, choices=ESTADOS, default='ABIERTO')
-    fecha_pedido = models.DateTimeField(auto_now_add=True)
+   # fecha_pedido = models.DateTimeField(auto_now_add=True)
+    fecha_pedido = models.DateTimeField(default=timezone.now)
     fecha_pago = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):

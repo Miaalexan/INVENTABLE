@@ -69,7 +69,6 @@
                                 <th>Nombre</th>
                                 <th>Correo</th>
                                 <th>Teléfono</th>
-                                <th>Dirección</th>
                                 <th>Estado</th>
                                 <th class="text-center">Acciones</th>
                             </tr>
@@ -82,7 +81,6 @@
                                     </td>
                                     <td>{{ cliente.correo }}</td>
                                     <td>{{ cliente.telefono }}</td>
-                                    <td>{{ cliente.direccion|default:"Sin dirección" }}</td>
                                     <td>
                                         {% if cliente.activo %}
                                             <span class="badge bg-success">Activo</span>
